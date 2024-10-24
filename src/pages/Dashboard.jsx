@@ -1,27 +1,29 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/db/supabase';
+import { createContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { Moon, Sun, Home, Car, PenSquare, BarChart2, Link, Search, Filter, Calendar, Palette, Tag, Clock, Plus, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, ChevronDown, CarFront, Sparkles, LogOut } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Toast, ToastProvider, ToastTitle } from "@/components/ui/toast"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { motion } from 'framer-motion'
-import { Bar, Pie } from 'react-chartjs-2'
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js'
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import AddForm from '@/components/AddForm';
+import Graficas from '@/components/Graficas';
 import Header from '@/components/Header';
+import NavBar from '@/components/NavBar';
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Toast, ToastProvider, ToastTitle } from "@/components/ui/toast";
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { motion } from 'framer-motion';
+import { AlertCircle, Calendar, Car, CarFront, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, Clock, Filter, Link, Palette, PenSquare, Search, Sparkles, Tag, X } from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -30,11 +32,11 @@ const ThemeContext = createContext({ isDark: false, toggleTheme: () => { } })
 
 // Datos de ejemplo
 const initialCars = [
-    { id: 1, brand: 'Toyota', model: 'Corolla', version: 'LE', year: 2022, color: '#FFFFFF', type: 'Básico', addedDate: '2023-01-15', image: 'https://example.com/toyota-corolla.jpg' },
-    { id: 2, brand: 'Honda', model: 'Civic', version: 'Touring', year: 2023, color: '#0000FF', type: 'Premium', addedDate: '2023-02-20', image: 'https://example.com/honda-civic.jpg' },
+    { id: 1, brand: 'Toyota', model: 'Corolla', version: 'LE', year: 2022, color: '#FFFFFF', type: 'Básico', addedDate: '2023-01-15', image: 'https://img.remediosdigitales.com/267028/corolla-2022/1366_2000.jpg' },
+    { id: 2, brand: 'Honda', model: 'Civic', version: 'Touring', year: 2023, color: '#0000FF', type: 'Premium', addedDate: '2023-02-20', image: 'https://www.louisvillehondaworld.com/assets/d3958/img/Honda-CIvic-Touring-Sedan-Morning-Mist-Metallic--1024x576.jpeg' },
     { id: 3, brand: 'Ford', model: 'Mustang', version: 'GT', year: 2021, color: '#FF0000', type: 'Premium', addedDate: '2023-03-10', image: 'https://img.remediosdigitales.com/473795/ford-mustang-shelby-gt500-mexico_/840_560.jpg' },
-    { id: 4, brand: 'Chevrolet', model: 'Spark', version: 'LT', year: 2022, color: '#00FF00', type: 'Básico', addedDate: '2023-04-05', image: 'https://example.com/chevrolet-spark.jpg' },
-    { id: 5, brand: 'Nissan', model: 'Sentra', version: 'SV', year: 2023, color: '#808080', type: 'Básico', addedDate: '2023-05-12', image: 'https://example.com/nissan-sentra.jpg' },
+    { id: 4, brand: 'Chevrolet', model: 'Spark', version: 'LT', year: 2022, color: '#00FF00', type: 'Básico', addedDate: '2023-04-05', image: 'https://www.elcarrocolombiano.com/wp-content/uploads/2021/06/20210617-CHEVROLET-SPARK-2022-ESTADOS-UNIDOS-PRECIO-CARACTERISTICAS-02.jpg' },
+    { id: 5, brand: 'Nissan', model: 'Sentra', version: 'SV', year: 2023, color: '#808080', type: 'Básico', addedDate: '2023-05-12', image: 'https://media.ed.edmunds-media.com/nissan/sentra/2022/oem/2022_nissan_sentra_sedan_sv_fq_oem_1_1280.jpg' },
     { id: 6, brand: 'Mazda', model: '3', version: 'Sedan', year: 2021, color: '#FF5733', type: 'Premium', addedDate: '2023-06-08', image: 'https://example.com/mazda-3.jpg' },
     { id: 7, brand: 'Subaru', model: 'Impreza', version: 'WRX', year: 2020, color: '#1C1C1C', type: 'Premium', addedDate: '2023-07-01', image: 'https://example.com/subaru-impreza.jpg' },
     { id: 8, brand: 'Volkswagen', model: 'Jetta', version: 'GLI', year: 2022, color: '#3333FF', type: 'Básico', addedDate: '2023-08-12', image: 'https://example.com/volkswagen-jetta.jpg' },
@@ -57,6 +59,23 @@ const initialCars = [
     { id: 25, brand: 'Ram', model: '1500', version: 'Rebel', year: 2022, color: '#708090', type: 'Básico', addedDate: '2024-06-01', image: 'https://example.com/ram-1500.jpg' },
 ];
 
+// eslint-disable-next-line react/prop-types
+function Notification({ message, success, onClose }) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose()
+        }, 5000)
+
+        return () => clearTimeout(timer)
+    }, [onClose])
+
+    return (
+        <div className={`fixed top-4 right-4 p-4 rounded-md shadow-md flex items-center space-x-2 ${success ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+            {success ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+            <span>{message}</span>
+        </div>
+    )
+}
 
 function Dashboard() {
     const [user, setUser] = useState(null);
@@ -68,8 +87,6 @@ function Dashboard() {
     const [isDark, setIsDark] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCar, setSelectedCar] = useState(null)
-    const [isAddingCar, setIsAddingCar] = useState(false)
-    const [newCar, setNewCar] = useState({ brand: '', model: '', version: '', year: '', color: '#000000', type: '', addedDate: '', image: '' })
     const [open, setOpen] = useState(false)
     const [toastMessage, setToastMessage] = useState('')
     const [filters, setFilters] = useState({ brands: [], years: [], types: [], colors: [] })
@@ -78,6 +95,7 @@ function Dashboard() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' })
     const [itemsPerPage, setItemsPerPage] = useState(5)
     const [errors, setErrors] = useState({})
+    const [notification, setNotification] = useState(null)
 
 
     const toggleTheme = () => {
@@ -125,40 +143,22 @@ function Dashboard() {
         return newErrors
     }
 
-    const addCar = () => {
-        const newErrors = validateCar(newCar)
-        if (Object.keys(newErrors).length === 0) {
-            const id = cars.length + 1
-            setCars([...cars, { ...newCar, id }])
-            setNewCar({ brand: '', model: '', version: '', year: '', color: '#000000', type: '', addedDate: '', image: '' })
-            setIsAddingCar(false)
-            showToast('Auto agregado con éxito')
-        } else {
-            setErrors(newErrors)
-        }
-    }
-
-    const updateCar = () => {
+    const updateCar = async () => {
         const newErrors = validateCar(selectedCar)
         if (Object.keys(newErrors).length === 0) {
             setCars(cars.map(car => car.id === selectedCar.id ? selectedCar : car))
             setSelectedCar(null)
             setIsEditModalOpen(false)
-            showToast('Auto actualizado con éxito')
+            setNotification({ message: 'Coche actualizado con éxito', success: true })
         } else {
             setErrors(newErrors)
         }
     }
 
-    const deleteCar = (id) => {
+    const deleteCar = async (id) => {
         setCars(cars.filter(car => car.id !== id))
         setSelectedCar(null)
-        showToast('Auto eliminado con éxito')
-    }
-
-    const showToast = (message) => {
-        setToastMessage(message)
-        setOpen(true)
+        setNotification({ message: 'Coche eliminado con éxito', success: true })
     }
 
     const carTypes = ['Básico', 'Premium']
@@ -174,7 +174,6 @@ function Dashboard() {
 
     const uniqueBrands = [...new Set(cars.map(car => car.brand))]
     const uniqueYears = [...new Set(cars.map(car => car.year))]
-    const uniqueColors = [...new Set(cars.map(car => car.color))]
 
     const handleFilterChange = (filterType, value) => {
         setFilters(prevFilters => ({
@@ -227,7 +226,7 @@ function Dashboard() {
             <ToastProvider>
                 <div className={`min-h-screen ${isDark ? 'dark bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} transition-colors duration-300`}>
                     {/* Header */}
-                    <Header activeTab='dashboard' isDark={isDark} />
+                    <Header activeTab='dashboard' isDark={isDark} toggleTheme={toggleTheme} />
 
                     <main className="container mx-auto p-4 pb-20">
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -236,7 +235,7 @@ function Dashboard() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5 }}
-                                    className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+                                    className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5"
                                 >
                                     <Card>
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -280,16 +279,17 @@ function Dashboard() {
                                     </div>
                                     <Dialog>
                                         <DialogTrigger asChild>
-
-                                            <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filtros</Button>
+                                            <Button variant="outline">
+                                                <Filter className="mr-2 h-4 w-4" /> Filtros
+                                            </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[750px]">
+                                        <DialogContent className="sm:max-w-[750px] h-[80%]">
                                             <DialogHeader>
                                                 <DialogTitle>Filtros</DialogTitle>
                                             </DialogHeader>
                                             <div className="grid grid-cols-1 gap-4">
-                                                <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-                                                    <div className="flex gap-10">
+                                                <ScrollArea className="h-[90%] w-full rounded-md border p-4">
+                                                    <div className="flex gap-20 justify-center">
                                                         <div>
                                                             <h3 className="mb-2 font-semibold flex items-center"><Car className="mr-2 h-4 w-4" /> Marca</h3>
                                                             {uniqueBrands.map(brand => (
@@ -330,22 +330,6 @@ function Dashboard() {
                                                                     </div>
                                                                 ))}
                                                             </div>
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="mb-2 font-semibold flex items-center"><Palette className="mr-2 h-4 w-4" /> Color</h3>
-                                                            {uniqueColors.map(color => (
-                                                                <div key={color} className="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        id={`color-${color}`}
-                                                                        checked={filters.colors.includes(color)}
-                                                                        onCheckedChange={() => handleFilterChange('colors', color)}
-                                                                    />
-                                                                    <label htmlFor={`color-${color}`} className="flex items-center">
-                                                                        <span className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: color }}></span>
-                                                                        {color}
-                                                                    </label>
-                                                                </div>
-                                                            ))}
                                                         </div>
                                                     </div>
                                                 </ScrollArea>
@@ -489,209 +473,30 @@ function Dashboard() {
 
                             {/* Add form */}
                             <TabsContent value="add">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Agregar Nuevo Auto</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <form onSubmit={(e) => { e.preventDefault(); addCar(); }} className="space-y-4">
-                                                <div className="flex items-center space-x-2">
-                                                    <Car className="h-4 w-4" />
-                                                    <Input
-                                                        placeholder="Marca"
-                                                        value={newCar.brand}
-                                                        onChange={(e) => setNewCar({ ...newCar, brand: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
-                                                {errors.brand && <p className="text-red-500 text-sm">{errors.brand}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <PenSquare className="h-4 w-4" />
-                                                    <Input
-                                                        placeholder="Modelo"
-                                                        value={newCar.model}
-                                                        onChange={(e) => setNewCar({ ...newCar, model: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
-                                                {errors.model && <p className="text-red-500 text-sm">{errors.model}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <Tag className="h-4 w-4" />
-                                                    <Input
-                                                        placeholder="Versión"
-                                                        value={newCar.version}
-                                                        onChange={(e) => setNewCar({ ...newCar, version: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
-                                                {errors.version && <p className="text-red-500 text-sm">{errors.version}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <Calendar className="h-4 w-4" />
-                                                    <Input
-                                                        placeholder="Año"
-                                                        type="number"
-                                                        value={newCar.year}
-                                                        onChange={(e) => setNewCar({ ...newCar, year: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <Palette className="h-4 w-4" />
-                                                    <Input
-                                                        type="color"
-                                                        value={newCar.color}
-                                                        onChange={(e) => setNewCar({ ...newCar, color: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
-                                                {errors.color && <p className="text-red-500 text-sm">{errors.color}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <Tag className="h-4 w-4" />
-                                                    <Select onValueChange={(value) => setNewCar({ ...newCar, type: value })} required>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Tipo" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="Básico">Básico</SelectItem>
-                                                            <SelectItem value="Premium">Premium</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <Calendar className="h-4 w-4" />
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <Button variant="outline">
-                                                                {newCar.addedDate ? format(new Date(newCar.addedDate), "dd 'de' MMMM 'de' yyyy", { locale: es }) : "Seleccionar fecha"}
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-auto p-0">
-                                                            <CalendarComponent
-                                                                mode="single"
-                                                                selected={newCar.addedDate ? new Date(newCar.addedDate) : undefined}
-                                                                onSelect={(date) => setNewCar({ ...newCar, addedDate: date ? date.toISOString().split('T')[0] : '' })}
-                                                                initialFocus
-                                                            />
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </div>
-                                                {errors.addedDate && <p className="text-red-500 text-sm">{errors.addedDate}</p>}
-                                                <div className="flex items-center space-x-2">
-                                                    <Input
-                                                        placeholder="URL de la imagen"
-                                                        value={newCar.image}
-                                                        onChange={(e) => setNewCar({ ...newCar, image: e.target.value })}
-                                                        required
-                                                    />
-                                                </div>
-                                                {errors.image && <p className="text-red-500 text-sm">{errors.image}</p>}
-                                                <Button type="submit">
-                                                    <Plus className="mr-2 h-4 w-4" /> Agregar Auto
-                                                </Button>
-                                            </form>
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
+                                <AddForm
+                                    setNotification={setNotification}
+                                    errors={errors}
+                                    setErrors={setErrors}
+                                    setActiveTab={setActiveTab}
+                                    validateCar={validateCar}
+                                />
                             </TabsContent>
 
                             {/* Graficas */}
                             <TabsContent value="stats" className="space-y-4">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                >
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Distribución por Tipo</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <Pie
-                                                data={{
-                                                    labels: carTypes,
-                                                    datasets: [{
-                                                        data: carsByType,
-                                                        backgroundColor: ['#3b82f6', '#ef4444'],
-                                                    }],
-                                                }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>Autos por Año</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <Bar
-                                                data={{
-                                                    labels: carsByYear.map(([year]) => year),
-                                                    datasets: [{
-                                                        label: 'Cantidad de Autos',
-                                                        data: carsByYear.map(([, count]) => count),
-                                                        backgroundColor: '#3b82f6',
-                                                    }],
-                                                }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                    <Card className='col-span-2'>
-                                        <CardHeader>
-                                            <CardTitle>Autos por Marca</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <Bar
-                                                data={{
-                                                    labels: carsByBrand.map(([brand]) => brand),
-                                                    datasets: [{
-                                                        label: 'Cantidad de Autos',
-                                                        data: carsByBrand.map(([, count]) => count),
-                                                        backgroundColor: '#10b981',
-                                                    }],
-                                                }}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
+                                <Graficas
+                                    cars={cars}
+                                    carTypes={carTypes}
+                                />
                             </TabsContent>
                         </Tabs>
                     </main>
 
                     {/* Navbar */}
-                    <motion.nav
-                        initial={{ y: 50, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300"
-                    >
-                        <div className="container mx-auto px-4">
-                            <div className="flex justify-around items-center h-16 relative">
-                                <Button variant="ghost" size="icon" onClick={() => setActiveTab('home')}>
-                                    <Home className={`h-6 w-6 ${activeTab === 'home' ? 'text-blue-500' : ''}`} />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => { setActiveTab('add'); setIsAddingCar(true); }}>
-                                    <PenSquare className={`h-6 w-6 ${activeTab === 'add' ? 'text-blue-500' : ''}`} />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => setActiveTab('stats')}>
-                                    <BarChart2 className={`h-6 w-6 ${activeTab === 'stats' ? 'text-blue-500' : ''}`} />
-                                </Button>
-                                <motion.div
-                                    className="absolute bottom-0 h-1 bg-blue-500"
-                                    initial={false}
-                                    animate={{
-                                        left: `${(activeTab === 'home' ? 0 : activeTab === 'add' ? 33.33 : 66.66)}%`,
-                                        width: '33.33%'
-                                    }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                />
-                            </div>
-                        </div>
-                    </motion.nav>
+                    <NavBar
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                    />
 
                     {/* Edit form modal */}
                     <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
@@ -830,6 +635,13 @@ function Dashboard() {
                     </Toast>
                 </div>
             </ToastProvider>
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    success={notification.success}
+                    onClose={() => setNotification(null)}
+                />
+            )}
         </ThemeContext.Provider>
     );
 }
