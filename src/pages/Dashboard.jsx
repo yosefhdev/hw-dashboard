@@ -21,6 +21,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import Header from '@/components/Header';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -78,13 +79,10 @@ function Dashboard() {
     const [itemsPerPage, setItemsPerPage] = useState(5)
     const [errors, setErrors] = useState({})
 
+
     const toggleTheme = () => {
         setIsDark(!isDark)
     }
-
-    useEffect(() => {
-        document.body.className = isDark ? 'dark' : 'light'
-    }, [isDark])
 
     const sortedCars = [...cars].sort((a, b) => {
         if (sortConfig.key !== null) {
@@ -220,15 +218,6 @@ function Dashboard() {
         getCurrentUser();
     }, []);
 
-    const handleSignOut = async () => {
-        try {
-            await supabase.auth.signOut();
-            navigate('/');
-        } catch (error) {
-            console.error('Error al cerrar sesión:', error.message);
-        }
-    };
-
     if (loading) {
         return <div>Cargando...</div>;
     }
@@ -237,25 +226,8 @@ function Dashboard() {
         <ThemeContext.Provider value={{ isDark, toggleTheme }}>
             <ToastProvider>
                 <div className={`min-h-screen ${isDark ? 'dark bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} transition-colors duration-300`}>
-                    <header className="bg-white dark:bg-gray-800 shadow-md">
-                        <div className="container mx-auto px-4 py-4">
-                            <div className="flex items-center justify-between">
-                                <h1 className="text-2xl font-bold">{
-                                    activeTab === 'home' ? 'Dashboard de Autos' :
-                                        activeTab === 'add' ? 'Agregar Nuevo Auto' :
-                                            'Estadísticas'
-                                }</h1>
-                                <div className="flex items-center space-x-2">
-                                    <Button variant="ghost" size="icon" onClick={toggleTheme}>
-                                        {isDark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                                        <LogOut className="h-6 w-6" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
+                    {/* Header */}
+                    <Header activeTab='dashboard' isDark={isDark} />
 
                     <main className="container mx-auto p-4 pb-20">
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
